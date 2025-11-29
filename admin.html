@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Kiosk</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background: #f8f9fa; }
+        .stat-card { border-left: 4px solid; }
+        .stat-card.sales { border-color: #28a745; }
+        .stat-card.transactions { border-color: #007bff; }
+        .stat-card.today { border-color: #17a2b8; }
+    </style>
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="loginScreen" class="min-vh-100 d-flex align-items-center justify-content-center">
+        <div class="card shadow" style="width: 400px;">
+            <div class="card-body p-5">
+                <h3 class="text-center mb-4">🔐 Admin Login</h3>
+                <div class="mb-3">
+                    <label class="form-label">Password</label>
+                    <input type="password" class="form-control" id="loginPassword" placeholder="Enter admin password">
+                </div>
+                <div class="d-grid gap-2">
+                    <button class="btn btn-primary" onclick="login()">Login</button>
+                    <a href="/" class="btn btn-outline-secondary">Back to Kiosk</a>
+                </div>
+                <div id="loginError" class="alert alert-danger mt-3 d-none">Incorrect password!</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Dashboard -->
+    <div id="adminDashboard" class="d-none">
+        <nav class="navbar navbar-dark bg-dark">
+            <div class="container-fluid">
+                <span class="navbar-brand">⚙️ Admin Dashboard</span>
+                <button class="btn btn-outline-light btn-sm" onclick="logout()">Logout</button>
+            </div>
+        </nav>
+
+        <div class="container py-4">
+            <!-- Statistics -->
+            <div class="row g-4 mb-4">
+                <div class="col-md-4">
+                    <div class="card stat-card sales shadow-sm">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <div class="me-3" style="font-size: 40px;">💰</div>
+                                <div>
+                                    <p class="text-muted mb-1">Total Sales</p>
+                                    <h3 class="mb-0" id="totalSales">₱0</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card stat-card transactions shadow-sm">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <div class="me-3" style="font-size: 40px;">📊</div>
+                                <div>
+                                    <p class="text-muted mb-1">Total Transactions</p>
+                                    <h3 class="mb-0" id="totalTransactions">0</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card stat-card today shadow-sm">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <div class="me-3" style="font-size: 40px;">📅</div>
+                                <div>
+                                    <p class="text-muted mb-1">Today's Sales</p>
+                                    <h3 class="mb-0" id="todaySales">0</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Price Management -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">💵 Price Management</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Sanitizer Only Price (₱)</label>
+                            <input type="number" class="form-control" id="priceSanitizer" value="30">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Sanitizer + Perfume Price (₱)</label>
+                            <input type="number" class="form-control" id="pricePerfume" value="35">
+                        </div>
+                    </div>
+                    <button class="btn btn-primary mt-3" onclick="updatePrices()">Update Prices</button>
+                    <div id="priceSuccess" class="alert alert-success mt-3 d-none">Prices updated successfully!</div>
+                </div>
+            </div>
+
+            <!-- Relay Testing -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">🔌 Manual Relay Testing</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">Click to test each relay (2 second activation)</p>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <button class="btn btn-outline-primary w-100" onclick="testRelay(1)">
+                                Channel 1 (Sanitizer)
+                            </button>
+                        </div>
+                        <div class="col-md-4">
+                            <button class="btn btn-outline-primary w-100" onclick="testRelay(2)">
+                                Channel 2 (Perfume A)
+                            </button>
+                        </div>
+                        <div class="col-md-4">
+                            <button class="btn btn-outline-primary w-100" onclick="testRelay(3)">
+                                Channel 3 (Perfume B)
+                            </button>
+                        </div>
+                        <div class="col-md-4">
+                            <button class="btn btn-outline-primary w-100" onclick="testRelay(4)">
+                                Channel 4 (Perfume C)
+                            </button>
+                        </div>
+                        <div class="col-md-4">
+                            <button class="btn btn-outline-secondary w-100" onclick="testRelay(5)">
+                                Channel 5 (Reserved)
+                            </button>
+                        </div>
+                    </div>
+                    <div id="relaySuccess" class="alert alert-info mt-3 d-none">Relay activated!</div>
+                </div>
+            </div>
+
+            <!-- Transaction History -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">📋 Transaction History</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Time</th>
+                                    <th>Product</th>
+                                    <th>Price (₱)</th>
+                                    <th>SOL Amount</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="transactionTable">
+                                <tr>
+                                    <td colspan="5" class="text-center text-muted py-4">No transactions yet</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Login
+        async function login() {
+            const password = document.getElementById('loginPassword').value;
+            const response = await fetch('/api/admin/login', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({password})
+            });
+            const result = await response.json();
+            
+            if (result.success) {
+                document.getElementById('loginScreen').classList.add('d-none');
+                document.getElementById('adminDashboard').classList.remove('d-none');
+                loadDashboard();
+            } else {
+                document.getElementById('loginError').classList.remove('d-none');
+            }
+        }
+
+        // Logout
+        async function logout() {
+            await fetch('/api/admin/logout', {method: 'POST'});
+            location.reload();
+        }
+
+        // Load dashboard data
+        async function loadDashboard() {
+            await Promise.all([loadStats(), loadPrices(), loadTransactions()]);
+        }
+
+        // Load statistics
+        async function loadStats() {
+            const response = await fetch('/api/admin/stats');
+            const stats = await response.json();
+            document.getElementById('totalSales').textContent = `₱${stats.total_sales.toFixed(2)}`;
+            document.getElementById('totalTransactions').textContent = stats.total_transactions;
+            document.getElementById('todaySales').textContent = stats.today_sales;
+        }
+
+        // Load prices
+        async function loadPrices() {
+            const response = await fetch('/api/admin/prices');
+            const prices = await response.json();
+            document.getElementById('priceSanitizer').value = prices.sanitizer;
+            document.getElementById('pricePerfume').value = prices.perfume;
+        }
+
+        // Update prices
+        async function updatePrices() {
+            const sanitizer = document.getElementById('priceSanitizer').value;
+            const perfume = document.getElementById('pricePerfume').value;
+            
+            await fetch('/api/admin/prices', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({sanitizer, perfume})
+            });
+            
+            const successMsg = document.getElementById('priceSuccess');
+            successMsg.classList.remove('d-none');
+            setTimeout(() => successMsg.classList.add('d-none'), 3000);
+        }
+
+        // Test relay
+        async function testRelay(channel) {
+            await fetch('/api/admin/test-relay', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({channel})
+            });
+            
+            const successMsg = document.getElementById('relaySuccess');
+            successMsg.textContent = `Channel ${channel} activated!`;
+            successMsg.classList.remove('d-none');
+            setTimeout(() => successMsg.classList.add('d-none'), 3000);
+        }
+
+        // Load transactions
+        async function loadTransactions() {
+            const response = await fetch('/api/admin/transactions');
+            const transactions = await response.json();
+            
+            const table = document.getElementById('transactionTable');
+            if (transactions.length === 0) {
+                table.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-4">No transactions yet</td></tr>';
+                return;
+            }
+            
+            table.innerHTML = transactions.map(tx => `
+                <tr>
+                    <td>${new Date(tx.timestamp).toLocaleString()}</td>
+                    <td>${tx.product_name}</td>
+                    <td>₱${tx.price}</td>
+                    <td>${tx.sol_amount.toFixed(6)} SOL</td>
+                    <td><span class="badge bg-success">${tx.status}</span></td>
+                </tr>
+            `).join('');
+        }
+
+        // Auto-refresh stats every 30 seconds
+        setInterval(() => {
+            if (!document.getElementById('adminDashboard').classList.contains('d-none')) {
+                loadStats();
+                loadTransactions();
+            }
+        }, 30000);
+
+        // Login on Enter key
+        document.getElementById('loginPassword')?.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') login();
+        });
+    </script>
+</body>
+</html>
